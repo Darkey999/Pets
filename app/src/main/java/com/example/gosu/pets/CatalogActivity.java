@@ -1,14 +1,23 @@
 package com.example.gosu.pets;
 
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
+
+import com.example.gosu.pets.data.PetContract.PetEntry;
+import com.example.gosu.pets.data.PetDbHelper;
 
 public class CatalogActivity extends AppCompatActivity {
+    private SQLiteDatabase db;
+    private PetDbHelper mDbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +35,16 @@ public class CatalogActivity extends AppCompatActivity {
         });
     }
 
+    // Insert test data to the db
+    private void InsertDummy() {
+        ContentValues values = new ContentValues();
+        values.put(PetEntry.COLUMN_PET_NAME, "Toto");
+        values.put(PetEntry.COLUMN_PET_BREED, "Terrier");
+        values.put(PetEntry.COLUMN_PET_GENDER, PetEntry.GENDER_MALE);
+        values.put(PetEntry.COLUMN_PET_WEIGHT, 7);
+        db.insert(PetEntry.TABLE_NAME, null, values);
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Adding menu items to the app bar.
@@ -39,7 +58,7 @@ public class CatalogActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             // "Insert dummy data" menu option clicked
             case R.id.action_insert_dummy_data:
-
+                InsertDummy();
                 return true;
             // "Delete all entries" menu option clicked
             case R.id.action_delete_all_entries:
@@ -48,4 +67,5 @@ public class CatalogActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
 }
