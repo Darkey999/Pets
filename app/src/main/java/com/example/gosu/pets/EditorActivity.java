@@ -1,5 +1,7 @@
 package com.example.gosu.pets;
 
+import android.content.ContentValues;
+import android.database.sqlite.SQLiteDatabase;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -11,8 +13,10 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.example.gosu.pets.data.PetContract.PetEntry;
+import com.example.gosu.pets.data.PetDbHelper;
 
 public class EditorActivity extends AppCompatActivity {
 
@@ -21,6 +25,8 @@ public class EditorActivity extends AppCompatActivity {
     private EditText weightEditText;
     private Spinner genderSpinner;
     private int gender = 0;
+    private SQLiteDatabase db;
+    private PetDbHelper mDbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +37,10 @@ public class EditorActivity extends AppCompatActivity {
         breedEditText = (EditText) findViewById(R.id.edit_pet_breed);
         weightEditText = (EditText) findViewById(R.id.edit_pet_weight);
         genderSpinner = (Spinner) findViewById(R.id.spinner_gender);
+
+        mDbHelper = new PetDbHelper(this);
+        // Create and/or open a database to read from it
+        db = mDbHelper.getReadableDatabase();
 
         setupSpinner();
     }
@@ -71,6 +81,18 @@ public class EditorActivity extends AppCompatActivity {
         });
     }
 
+    // Inserts pet to the db
+    private void InsertPet() {
+        ContentValues values = new ContentValues();
+        values.put(PetEntry.COLUMN_PET_NAME, nameEditText.getText().toString().trim());
+        values.put(PetEntry.COLUMN_PET_BREED, breedEditText.getText().toString().trim());
+        values.put(PetEntry.COLUMN_PET_GENDER, gender);
+        values.put(PetEntry.COLUMN_PET_WEIGHT, weightEditText.getText().toString().trim());
+        long id = db.insert(PetEntry.TABLE_NAME, null, values);
+        Toast.makeText(EditorActivity.this, "Pet added with id: " + (int) id, Toast.LENGTH_SHORT).show();
+
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Adding menu items to the app bar.
@@ -84,7 +106,8 @@ public class EditorActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             // "Save" menu option clicked
             case R.id.action_save:
-
+                InsertPet();
+                finish();
                 return true;
             // "Delete" menu option clicked
             case R.id.action_delete:

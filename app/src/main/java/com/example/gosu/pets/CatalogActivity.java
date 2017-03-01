@@ -24,7 +24,7 @@ public class CatalogActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_catalog);
 
-        // Setup FAB to open EditorActivity
+        // Set up FAB to open EditorActivity
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -33,9 +33,10 @@ public class CatalogActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+        displayDatabaseInfo();
     }
 
-    // Insert test data to the db
+    // Inserts test data to the db
     private void InsertDummy() {
         ContentValues values = new ContentValues();
         values.put(PetEntry.COLUMN_PET_NAME, "Toto");
@@ -47,7 +48,7 @@ public class CatalogActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Adding menu items to the app bar.
+        // Add menu items to the app bar.
         getMenuInflater().inflate(R.menu.menu_catalog, menu);
         return true;
     }
@@ -59,6 +60,7 @@ public class CatalogActivity extends AppCompatActivity {
             // "Insert dummy data" menu option clicked
             case R.id.action_insert_dummy_data:
                 InsertDummy();
+                displayDatabaseInfo();
                 return true;
             // "Delete all entries" menu option clicked
             case R.id.action_delete_all_entries:
@@ -68,4 +70,28 @@ public class CatalogActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        displayDatabaseInfo();
+    }
+
+    // Shows number of the rows in the table
+    private void displayDatabaseInfo() {
+
+        mDbHelper = new PetDbHelper(this);
+        // Create and/or open a database to read from it
+        db = mDbHelper.getWritableDatabase();
+
+        // "SELECT * FROM pets" used for getting all rows from the pets table
+        Cursor cursor = db.rawQuery("SELECT * FROM " + PetEntry.TABLE_NAME, null);
+        try {
+            // Display the number of rows in the Cursor
+            TextView displayView = (TextView) findViewById(R.id.text_view_pet);
+            displayView.setText("Number of rows in pets database table: " + cursor.getCount());
+        } finally {
+            // Close the cursor, this releases all its resources and makes it invalid
+            cursor.close();
+        }
+    }
 }
