@@ -40,7 +40,7 @@ public class EditorActivity extends AppCompatActivity {
 
         mDbHelper = new PetDbHelper(this);
         // Create and/or open a database to read from it
-        db = mDbHelper.getReadableDatabase();
+        db = mDbHelper.getWritableDatabase();
 
         setupSpinner();
     }
@@ -89,7 +89,11 @@ public class EditorActivity extends AppCompatActivity {
         values.put(PetEntry.COLUMN_PET_GENDER, gender);
         values.put(PetEntry.COLUMN_PET_WEIGHT, weightEditText.getText().toString().trim());
         long id = db.insert(PetEntry.TABLE_NAME, null, values);
-        Toast.makeText(EditorActivity.this, "Pet added with id: " + (int) id, Toast.LENGTH_SHORT).show();
+        if (id != -1) {
+            Toast.makeText(EditorActivity.this, "Pet added with id: " + (int) id, Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(EditorActivity.this, "Error with saving pet", Toast.LENGTH_SHORT).show();
+        }
 
     }
 
