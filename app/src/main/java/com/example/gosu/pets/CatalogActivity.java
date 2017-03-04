@@ -90,7 +90,7 @@ public class CatalogActivity extends AppCompatActivity {
                 PetEntry.COLUMN_PET_GENDER,
                 PetEntry.COLUMN_PET_WEIGHT,};
 
-        // "SELECT * FROM pets" used for getting all rows from the pets table
+        // Use projections tab to choose proper columns
         Cursor cursor = db.query(PetEntry.TABLE_NAME, projections, null, null, null, null, null);
         try {
 
