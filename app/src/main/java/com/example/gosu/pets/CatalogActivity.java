@@ -3,7 +3,6 @@ package com.example.gosu.pets;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -13,11 +12,8 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.example.gosu.pets.data.PetContract.PetEntry;
-import com.example.gosu.pets.data.PetDbHelper;
 
 public class CatalogActivity extends AppCompatActivity {
-    private SQLiteDatabase db;
-    private PetDbHelper mDbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +39,7 @@ public class CatalogActivity extends AppCompatActivity {
         values.put(PetEntry.COLUMN_PET_BREED, "Terrier");
         values.put(PetEntry.COLUMN_PET_GENDER, PetEntry.GENDER_MALE);
         values.put(PetEntry.COLUMN_PET_WEIGHT, 7);
-        db.insert(PetEntry.TABLE_NAME, null, values);
+        getContentResolver().insert(PetEntry.CONTENT_URI, values);
     }
 
     @Override
@@ -79,10 +75,6 @@ public class CatalogActivity extends AppCompatActivity {
     // Shows number of the rows in the table
     private void displayDatabaseInfo() {
 
-        mDbHelper = new PetDbHelper(this);
-        // Create and/or open a database to read from it
-        db = mDbHelper.getWritableDatabase();
-
         // List of columns that I am interested in
         String[] projections = new String[]{PetEntry._ID,
                 PetEntry.COLUMN_PET_NAME,
@@ -91,7 +83,7 @@ public class CatalogActivity extends AppCompatActivity {
                 PetEntry.COLUMN_PET_WEIGHT,};
 
         // Use projections tab to choose proper columns
-        Cursor cursor = db.query(PetEntry.TABLE_NAME, projections, null, null, null, null, null);
+        Cursor cursor = getContentResolver().query(PetEntry.CONTENT_URI, projections, null, null, null);
         try {
 
             // Display the number of rows in the Cursor

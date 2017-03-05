@@ -48,4 +48,6 @@
 
     <!-- Label for dropdown menu option if the pet is female -->
     <string name="gender_female">Female</string>
+    <string name="pet_add_toast">Pet added</string>
+    <string name="pet_save_error_toast">Error with saving pet</string>
 </resources>

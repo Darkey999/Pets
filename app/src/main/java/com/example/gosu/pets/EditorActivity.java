@@ -1,7 +1,7 @@
 package com.example.gosu.pets;
 
 import android.content.ContentValues;
-import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -16,7 +16,6 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.example.gosu.pets.data.PetContract.PetEntry;
-import com.example.gosu.pets.data.PetDbHelper;
 
 public class EditorActivity extends AppCompatActivity {
 
@@ -25,8 +24,6 @@ public class EditorActivity extends AppCompatActivity {
     private EditText weightEditText;
     private Spinner genderSpinner;
     private int gender = 0;
-    private SQLiteDatabase db;
-    private PetDbHelper mDbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,10 +34,6 @@ public class EditorActivity extends AppCompatActivity {
         breedEditText = (EditText) findViewById(R.id.edit_pet_breed);
         weightEditText = (EditText) findViewById(R.id.edit_pet_weight);
         genderSpinner = (Spinner) findViewById(R.id.spinner_gender);
-
-        mDbHelper = new PetDbHelper(this);
-        // Create and/or open a database to read from it
-        db = mDbHelper.getWritableDatabase();
 
         setupSpinner();
     }
@@ -88,11 +81,11 @@ public class EditorActivity extends AppCompatActivity {
         values.put(PetEntry.COLUMN_PET_BREED, breedEditText.getText().toString().trim());
         values.put(PetEntry.COLUMN_PET_GENDER, gender);
         values.put(PetEntry.COLUMN_PET_WEIGHT, weightEditText.getText().toString().trim());
-        long id = db.insert(PetEntry.TABLE_NAME, null, values);
-        if (id != -1) {
-            Toast.makeText(EditorActivity.this, "Pet added with id: " + (int) id, Toast.LENGTH_SHORT).show();
+        Uri newUri = getContentResolver().insert(PetEntry.CONTENT_URI, values);
+        if (newUri != null) {
+            Toast.makeText(EditorActivity.this, R.string.pet_add_toast, Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(EditorActivity.this, "Error with saving pet", Toast.LENGTH_SHORT).show();
+            Toast.makeText(EditorActivity.this, R.string.pet_save_error_toast, Toast.LENGTH_SHORT).show();
         }
 
     }
