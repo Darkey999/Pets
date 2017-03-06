@@ -59,7 +59,8 @@ public class PetProvider extends ContentProvider {
                         selectionArgs, null, null, sortOrder);
                 break;
             default:
-                throw new IllegalArgumentException("Cannot query unknown URI" + uri);
+                Toast.makeText(getContext(), "Cannot query unknown URI" + uri, Toast.LENGTH_SHORT).show();
+                return null;
 
         }
 
@@ -70,13 +71,13 @@ public class PetProvider extends ContentProvider {
     @Override
     public Uri insert(Uri uri, ContentValues contentValues) {
         final int match = sUriMatcher.match(uri);
-        Log.d("dafaqdafaq0", String.valueOf(match));
         // Check the URI
         switch (match) {
             case PETS:
                 return insertPet(uri, contentValues);
             default:
-                throw new IllegalArgumentException("Cannot query unknown URI " + uri);
+                Toast.makeText(getContext(), "Cannot query unknown URI " + uri, Toast.LENGTH_SHORT).show();
+                return null;
         }
     }
 
@@ -118,19 +119,102 @@ public class PetProvider extends ContentProvider {
 
     // Updates the data at the given selection and selection arguments
     @Override
-    public int update(Uri uri, ContentValues contentValues, String selection, String[] selectionArgs) {
-        return 0;
+    public int update(Uri uri, ContentValues contentValues, String selection,
+                      String[] selectionArgs) {
+        final int match = sUriMatcher.match(uri);
+        // Check the URI
+        switch (match) {
+            case PETS:
+                return updatePet(uri, contentValues, selection, selectionArgs);
+            case PET_ID:
+                // For the PET_ID code, extract out the ID from the URI,
+                // so we know which row to update. Selection will be "_id=?" and selection
+                // arguments will be a String array containing the actual ID.
+                selection = PetEntry._ID + "=?";
+                selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
+                return updatePet(uri, contentValues, selection, selectionArgs);
+            default:
+                Toast.makeText(getContext(), "Update is not supported for " + uri, Toast.LENGTH_SHORT).show();
+                return 0;
+        }
+    }
+
+    // Update existing pet, used in .update()
+    private int updatePet(Uri uri, ContentValues contentValues, String selection, String[] selectionArgs) {
+        // Check the name
+        if (contentValues.containsKey(PetEntry.COLUMN_PET_NAME)) {
+            String name = contentValues.getAsString(PetEntry.COLUMN_PET_NAME);
+            if (TextUtils.isEmpty(name)) {
+                Toast.makeText(getContext(), R.string.pet_name_required, Toast.LENGTH_SHORT).show();
+                return 0;
+            }
+        }
+        // Check gender
+        if (contentValues.containsKey(PetEntry.COLUMN_PET_GENDER)) {
+            Integer gender = contentValues.getAsInteger(PetEntry.COLUMN_PET_GENDER);
+            if (gender == null || (gender != PetEntry.GENDER_UNKNOWN && gender != PetEntry.GENDER_MALE
+                    && gender != PetEntry.GENDER_FEMALE)) {
+                Toast.makeText(getContext(), R.string.pet_gender_required, Toast.LENGTH_SHORT).show();
+                return 0;
+            }
+        }
+        // Check weight
+        if (contentValues.containsKey(PetEntry.COLUMN_PET_WEIGHT)) {
+            Integer weight = contentValues.getAsInteger(PetEntry.COLUMN_PET_WEIGHT);
+            if (weight != null && weight < 0) {
+                Toast.makeText(getContext(), R.string.pet_weight_required, Toast.LENGTH_SHORT).show();
+                return 0;
+            }
+        }
+
+        // Don't update if there is nothing new
+        if (contentValues.size() == 0) {
+            return 0;
+        }
+
+        SQLiteDatabase database = petHelper.getWritableDatabase();
+
+        // Returns the number of database rows affected by the update statement
+        return database.update(PetEntry.TABLE_NAME, contentValues, selection, selectionArgs);
     }
 
     // Delete the data at the given selection and selection arguments
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        return 0;
+        SQLiteDatabase database = petHelper.getWritableDatabase();
+
+        final int match = sUriMatcher.match(uri);
+        // Check the URI
+        switch (match) {
+            case PETS:
+                // Delete all rows that match the selection and selection args
+                return database.delete(PetEntry.TABLE_NAME, selection, selectionArgs);
+            case PET_ID:
+                // Delete a single row given by the ID in the URI
+                selection = PetEntry._ID + "=?";
+                selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
+                return database.delete(PetEntry.TABLE_NAME, selection, selectionArgs);
+            default:
+                Toast.makeText(getContext(), "Deletion is not supported for: " +
+                        uri, Toast.LENGTH_SHORT).show();
+                return 0;
+        }
     }
 
     // Returns the type of data for the content URI
     @Override
     public String getType(Uri uri) {
-        return null;
+        final int match = sUriMatcher.match(uri);
+        // Check the URI
+        switch (match) {
+            case PETS:
+                return PetEntry.CONTENT_LIST_TYPE;
+            case PET_ID:
+                return PetEntry.CONTENT_ITEM_TYPE;
+            default:
+                Toast.makeText(getContext(), "Unknown URI " + uri + " with match " +
+                        match, Toast.LENGTH_SHORT).show();
+                return null;
+        }
     }
 }
