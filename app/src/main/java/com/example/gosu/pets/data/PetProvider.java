@@ -7,7 +7,12 @@ import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Toast;
+
+import com.example.gosu.pets.R;
+import com.example.gosu.pets.data.PetContract.PetEntry;
 
 // Content Provider for Pets app
 public class PetProvider extends ContentProvider {
@@ -42,15 +47,15 @@ public class PetProvider extends ContentProvider {
         // Check the URI
         switch (match) {
             case PETS:
-                cursor = database.query(PetContract.PetEntry.TABLE_NAME, projection, selection,
+                cursor = database.query(PetEntry.TABLE_NAME, projection, selection,
                         selectionArgs, null, null, sortOrder);
                 break;
             case PET_ID:
                 // "_id=?"
-                selection = PetContract.PetEntry._ID + "=?";
+                selection = PetEntry._ID + "=?";
                 // Get ID from URI
                 selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
-                cursor = database.query(PetContract.PetEntry.TABLE_NAME, projection, selection,
+                cursor = database.query(PetEntry.TABLE_NAME, projection, selection,
                         selectionArgs, null, null, sortOrder);
                 break;
             default:
@@ -65,20 +70,43 @@ public class PetProvider extends ContentProvider {
     @Override
     public Uri insert(Uri uri, ContentValues contentValues) {
         final int match = sUriMatcher.match(uri);
-
+        Log.d("dafaqdafaq0", String.valueOf(match));
         // Check the URI
         switch (match) {
             case PETS:
                 return insertPet(uri, contentValues);
             default:
-                throw new IllegalArgumentException("Cannot query unknown URI" + uri);
+                throw new IllegalArgumentException("Cannot query unknown URI " + uri);
         }
     }
 
     // Insert new pet, used in .insert()
     private Uri insertPet(Uri uri, ContentValues contentValues) {
+        // Check validity of the data
+        String name = contentValues.getAsString(PetEntry.COLUMN_PET_NAME);
+        Integer gender = contentValues.getAsInteger(PetEntry.COLUMN_PET_GENDER);
+        Integer weight = contentValues.getAsInteger(PetEntry.COLUMN_PET_WEIGHT);
+
+        if (TextUtils.isEmpty(name)) {
+            Toast.makeText(getContext(), R.string.pet_name_required, Toast.LENGTH_SHORT).show();
+            return null;
+        }
+
+        if (gender == null || (gender != PetEntry.GENDER_UNKNOWN && gender != PetEntry.GENDER_MALE
+                && gender != PetEntry.GENDER_FEMALE)) {
+            Toast.makeText(getContext(), R.string.pet_gender_required, Toast.LENGTH_SHORT).show();
+            return null;
+        }
+
+        if (weight != null && weight < 0) {
+            Toast.makeText(getContext(), R.string.pet_weight_required, Toast.LENGTH_SHORT).show();
+            return null;
+        }
+
         SQLiteDatabase database = petHelper.getWritableDatabase();
-        long id = database.insert(PetContract.PetEntry.TABLE_NAME, null, contentValues);
+
+        // Insert new pet
+        long id = database.insert(PetEntry.TABLE_NAME, null, contentValues);
 
         // Problem with insertion
         if (id != -1) {
