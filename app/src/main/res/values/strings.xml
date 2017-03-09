@@ -57,4 +57,8 @@
     <string name="pet_name_required">Pet requires a name</string>
     <string name="pet_gender_required">"Pet requires valid gender</string>
     <string name="pet_weight_required">"Pet requires valid weight</string>
+
+    <!-- Text for empty View -->
+    <string name="empty_view_title_text">It\'s a bit lonely here…</string>
+    <string name="empty_view_subtitle_text">Get started by adding a pet</string>
 </resources>

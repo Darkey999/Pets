@@ -16,13 +16,17 @@ import com.example.gosu.pets.data.PetContract.PetEntry;
 public class CatalogActivity extends AppCompatActivity {
     private ListView lvItems;
     private PetCursorAdapter petAdapter;
-
+    private View emptyView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_catalog);
 
         lvItems = (ListView) findViewById(R.id.lvItems);
+        emptyView = findViewById(R.id.empty_view);
+
+        // Set empty View
+        lvItems.setEmptyView(emptyView);
 
         // Set up FAB to open EditorActivity
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -64,7 +68,8 @@ public class CatalogActivity extends AppCompatActivity {
                 return true;
             // "Delete all entries" menu option clicked
             case R.id.action_delete_all_entries:
-
+                getContentResolver().delete(PetEntry.CONTENT_URI,null,null);
+                displayDatabaseInfo();
                 return true;
         }
         return super.onOptionsItemSelected(item);
