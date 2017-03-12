@@ -1,8 +1,10 @@
 package com.example.gosu.pets;
 
+import android.app.AlertDialog;
 import android.app.LoaderManager;
 import android.content.ContentValues;
 import android.content.CursorLoader;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
@@ -111,7 +113,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         } else {
             rowUpdated = getContentResolver().update(PetEntry.CONTENT_URI, values, null, null);
         }
-        
+
         // Result of the action
         if (newUri != null && intent.getData() == null) {
             Toast.makeText(EditorActivity.this, R.string.pet_add_toast, Toast.LENGTH_SHORT).show();
@@ -144,11 +146,57 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
                 return true;
             // Arrow button clicked, navigating back to parent activity
-            case R.id.home:
+            case android.R.id.home:
+
+                if (!TextUtils.isEmpty(nameEditText.getText())
+                        || !TextUtils.isEmpty(breedEditText.getText())
+                        || !TextUtils.isEmpty(weightEditText.getText())) {
+                    // Build alert dialog
+                    AlertDialog.Builder alert = new AlertDialog.Builder(this);
+                    alert.setMessage("Discard your changes and quit editing?");
+                    alert.setPositiveButton("Discard", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            NavUtils.navigateUpFromSameTask(EditorActivity.this);
+                            Toast.makeText(EditorActivity.this, R.string.changes_discarded,
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    alert.setNegativeButton("Keep editing", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                        }
+                    });
+                    alert.show();
+
+                    return true;
+                }
                 NavUtils.navigateUpFromSameTask(this);
+                finish();
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    // Handle back button
+    @Override
+    public void onBackPressed() {
+        if (!TextUtils.isEmpty(nameEditText.getText())
+                || !TextUtils.isEmpty(breedEditText.getText())
+                || !TextUtils.isEmpty(weightEditText.getText())) {
+            // Build alert dialog
+            AlertDialog.Builder alert = new AlertDialog.Builder(this);
+            alert.setMessage("Discard your changes and quit editing?");
+            alert.setPositiveButton("Discard", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                    finish();
+                }
+            });
+            alert.setNegativeButton("Keep editing", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                }
+            });
+            alert.show();
+        }
+        Toast.makeText(EditorActivity.this, R.string.changes_discarded, Toast.LENGTH_SHORT).show();
     }
 
     // CursorLoader onCreate

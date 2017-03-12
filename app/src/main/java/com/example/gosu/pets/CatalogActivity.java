@@ -15,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 
 import com.example.gosu.pets.data.PetContract.PetEntry;
 
@@ -22,7 +23,7 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
     private ListView lvItems;
     private View emptyView;
     private PetCursorAdapter petAdapter;
-
+    private ProgressBar pBar;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,6 +31,7 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
 
         lvItems = (ListView) findViewById(R.id.lvItems);
         emptyView = findViewById(R.id.empty_view);
+        pBar = (ProgressBar) findViewById(R.id.pBar);
 
         // Set empty View
         lvItems.setEmptyView(emptyView);
@@ -112,6 +114,7 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
     @Override
     public void onLoadFinished(android.content.Loader<Cursor> loader, Cursor data) {
         petAdapter.swapCursor(data);
+        pBar.setVisibility(View.GONE);
     }
 
     // CursorLoader onLoaderReset

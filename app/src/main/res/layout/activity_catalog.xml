@@ -43,6 +43,13 @@
             android:textColor="#A2AAB0"/>
     </RelativeLayout>
 
+    <ProgressBar
+        android:id="@+id/pBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:indeterminate="true"/>
+
     <ListView
         android:id="@+id/lvItems"
         android:layout_width="match_parent"
