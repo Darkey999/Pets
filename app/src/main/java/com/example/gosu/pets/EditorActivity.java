@@ -1,6 +1,11 @@
 package com.example.gosu.pets;
 
+import android.app.LoaderManager;
 import android.content.ContentValues;
+import android.content.CursorLoader;
+import android.content.Intent;
+import android.content.Loader;
+import android.database.Cursor;
 import android.net.Uri;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
@@ -17,13 +22,15 @@ import android.widget.Toast;
 
 import com.example.gosu.pets.data.PetContract.PetEntry;
 
-public class EditorActivity extends AppCompatActivity {
+public class EditorActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private EditText nameEditText;
     private EditText breedEditText;
     private EditText weightEditText;
     private Spinner genderSpinner;
     private int gender = 0;
+    private Intent intent;
+    private Uri petUri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +43,18 @@ public class EditorActivity extends AppCompatActivity {
         genderSpinner = (Spinner) findViewById(R.id.spinner_gender);
 
         setupSpinner();
+
+        // Get Intent
+        intent = getIntent();
+        if (intent.getData() == null) {
+            setTitle(R.string.editor_activity_title_new_pet);
+        } else {
+            setTitle(R.string.editor_activity_title_edit_pet);
+            // Get URI of the pet
+            petUri = intent.getData();
+            // Prepare the LoaderManager
+            getLoaderManager().initLoader(1, null, this);
+        }
     }
 
     // Set up spinner, which allows to choose gender of the pet
@@ -74,16 +93,30 @@ public class EditorActivity extends AppCompatActivity {
         });
     }
 
-    // Inserts pet to the db
-    private void InsertPet() {
+    // Saves pet to the db
+    private void savePet() {
+
+        //Set values
         ContentValues values = new ContentValues();
         values.put(PetEntry.COLUMN_PET_NAME, nameEditText.getText().toString().trim());
         values.put(PetEntry.COLUMN_PET_BREED, breedEditText.getText().toString().trim());
         values.put(PetEntry.COLUMN_PET_GENDER, gender);
         values.put(PetEntry.COLUMN_PET_WEIGHT, weightEditText.getText().toString().trim());
-        Uri newUri = getContentResolver().insert(PetEntry.CONTENT_URI, values);
-        if (newUri != null) {
+        Uri newUri = null;
+        int rowUpdated = 0;
+
+        // Check data
+        if (intent.getData() == null) {
+            newUri = getContentResolver().insert(PetEntry.CONTENT_URI, values);
+        } else {
+            rowUpdated = getContentResolver().update(PetEntry.CONTENT_URI, values, null, null);
+        }
+        
+        // Result of the action
+        if (newUri != null && intent.getData() == null) {
             Toast.makeText(EditorActivity.this, R.string.pet_add_toast, Toast.LENGTH_SHORT).show();
+        } else if (rowUpdated != 0 && intent.getData() != null) {
+            Toast.makeText(EditorActivity.this, R.string.pet_edit_toast, Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(EditorActivity.this, R.string.pet_save_error_toast, Toast.LENGTH_SHORT).show();
         }
@@ -103,7 +136,7 @@ public class EditorActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             // "Save" menu option clicked
             case R.id.action_save:
-                InsertPet();
+                savePet();
                 finish();
                 return true;
             // "Delete" menu option clicked
@@ -111,10 +144,58 @@ public class EditorActivity extends AppCompatActivity {
 
                 return true;
             // Arrow button clicked, navigating back to parent activity
-            case android.R.id.home:
+            case R.id.home:
                 NavUtils.navigateUpFromSameTask(this);
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    // CursorLoader onCreate
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+
+        // List of columns that I am interested in
+        String[] projections = new String[]{
+                PetEntry._ID,
+                PetEntry.COLUMN_PET_NAME,
+                PetEntry.COLUMN_PET_BREED,
+                PetEntry.COLUMN_PET_GENDER,
+                PetEntry.COLUMN_PET_WEIGHT};
+
+        return new CursorLoader(this, petUri, projections, null, null, null);
+    }
+
+    // CursorLoader onLoadFinished
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        if (cursor.moveToFirst()) {
+            // Get columns indexes
+            int nameColumnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_NAME);
+            int breedColumnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_BREED);
+            int genderColumnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_GENDER);
+            int weightColumnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_WEIGHT);
+
+            // Get String from chosen columns
+            String petName = cursor.getString(nameColumnIndex);
+            String breedName = cursor.getString(breedColumnIndex);
+            int gender = cursor.getInt(genderColumnIndex);
+            int weight = cursor.getInt(weightColumnIndex);
+
+            //Set values
+            nameEditText.setText(petName);
+            breedEditText.setText(breedName);
+            genderSpinner.setSelection(gender);
+            weightEditText.setText(String.valueOf(weight));
+        }
+    }
+
+    // CursorLoader onLoaderReset
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        nameEditText.setText("");
+        breedEditText.setText("");
+        weightEditText.setText("");
+        genderSpinner.setSelection(0);
     }
 }

@@ -1,6 +1,7 @@
 package com.example.gosu.pets;
 
 import android.app.LoaderManager;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.CursorLoader;
 import android.content.Intent;
@@ -12,6 +13,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.example.gosu.pets.data.PetContract.PetEntry;
@@ -36,6 +38,16 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
         petAdapter = new PetCursorAdapter(this, null);
         lvItems.setAdapter(petAdapter);
 
+        // Set item click listener, open EditorActivity
+        lvItems.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(CatalogActivity.this, EditorActivity.class);
+                //Add URI of clicked pet "content://com.example.android.pets/pets/id"
+                intent.setData(ContentUris.withAppendedId(PetEntry.CONTENT_URI, id));
+                startActivity(intent);
+            }
+        });
         // Set up FAB to open EditorActivity
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
