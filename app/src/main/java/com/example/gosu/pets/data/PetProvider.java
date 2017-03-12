@@ -64,6 +64,9 @@ public class PetProvider extends ContentProvider {
 
         }
 
+        // Notify that some data has changed
+        cursor.setNotificationUri(getContext().getContentResolver(), uri);
+
         return cursor;
     }
 
@@ -113,6 +116,9 @@ public class PetProvider extends ContentProvider {
         if (id != -1) {
             Log.e("Failed to insert for", String.valueOf(uri));
         }
+
+        // Notify that some data has changed
+        getContext().getContentResolver().notifyChange(uri, null);
 
         return ContentUris.withAppendedId(uri, id);
     }
@@ -174,26 +180,48 @@ public class PetProvider extends ContentProvider {
 
         SQLiteDatabase database = petHelper.getWritableDatabase();
 
+        int rowsUpdated = database.update(PetEntry.TABLE_NAME, contentValues, selection, selectionArgs);
+
+        // Notify that some data has changed
+        if (rowsUpdated != 0)
+            getContext().getContentResolver().notifyChange(uri, null);
+
         // Returns the number of database rows affected by the update statement
-        return database.update(PetEntry.TABLE_NAME, contentValues, selection, selectionArgs);
+        return rowsUpdated;
     }
 
     // Delete the data at the given selection and selection arguments
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
         SQLiteDatabase database = petHelper.getWritableDatabase();
-
+        int rowsDeleted;
         final int match = sUriMatcher.match(uri);
         // Check the URI
         switch (match) {
             case PETS:
+                // Get number of deleted rows
+                rowsDeleted = database.delete(PetEntry.TABLE_NAME, selection, selectionArgs);
+
+                // Notify that some data has changed
+                if (rowsDeleted != 0)
+                    getContext().getContentResolver().notifyChange(uri, null);
+
                 // Delete all rows that match the selection and selection args
-                return database.delete(PetEntry.TABLE_NAME, selection, selectionArgs);
+                return rowsDeleted;
             case PET_ID:
                 // Delete a single row given by the ID in the URI
                 selection = PetEntry._ID + "=?";
                 selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
-                return database.delete(PetEntry.TABLE_NAME, selection, selectionArgs);
+
+                // Get number of deleted rows
+                rowsDeleted = database.delete(PetEntry.TABLE_NAME, selection, selectionArgs);
+
+                // Notify that some data has changed
+                if (rowsDeleted != 0)
+                    getContext().getContentResolver().notifyChange(uri, null);
+
+                // Delete all rows that match the selection and selection args
+                return rowsDeleted;
             default:
                 Toast.makeText(getContext(), "Deletion is not supported for: " +
                         uri, Toast.LENGTH_SHORT).show();
