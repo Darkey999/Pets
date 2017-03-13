@@ -129,6 +129,13 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     public boolean onCreateOptionsMenu(Menu menu) {
         // Adding menu items to the app bar.
         getMenuInflater().inflate(R.menu.menu_editor, menu);
+        MenuItem menuItemDelete = menu.findItem(R.id.action_delete);
+
+        // Remove 'delete' if adding new pet
+        if (intent.getData() == null) {
+            menuItemDelete.setVisible(false);
+        }
+
         return true;
     }
 
@@ -187,6 +194,8 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             alert.setMessage("Discard your changes and quit editing?");
             alert.setPositiveButton("Discard", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int which) {
+                    Toast.makeText(EditorActivity.this, R.string.changes_discarded,
+                            Toast.LENGTH_SHORT).show();
                     finish();
                 }
             });
@@ -196,7 +205,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             });
             alert.show();
         }
-        Toast.makeText(EditorActivity.this, R.string.changes_discarded, Toast.LENGTH_SHORT).show();
     }
 
     // CursorLoader onCreate
