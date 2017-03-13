@@ -79,4 +79,12 @@
     <string name="pet_deleted">Pet deleted</string>
     <string name="pet_not_deleted">Error with deleting pet</string>
 
+    <!-- Deleting all pets -->
+    <string name="delete_all_pets_confirmation">Do you want to delete all pets?</string>
+    <string name="pets_deleted">All pets deleted</string>
+    <string name="deleting_all_problem">Problem with deleting pets</string>
+
+    <!-- Unknown breed -->
+    <string name="unknown_breed">Unknown breed</string>
+
 </resources>

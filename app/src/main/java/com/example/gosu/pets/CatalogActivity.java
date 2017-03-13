@@ -1,9 +1,11 @@
 package com.example.gosu.pets;
 
+import android.app.AlertDialog;
 import android.app.LoaderManager;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.CursorLoader;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
@@ -16,6 +18,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.example.gosu.pets.data.PetContract.PetEntry;
 
@@ -24,6 +27,7 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
     private View emptyView;
     private PetCursorAdapter petAdapter;
     private ProgressBar pBar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -90,7 +94,27 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
                 return true;
             // "Delete all entries" menu option clicked
             case R.id.action_delete_all_entries:
-                getContentResolver().delete(PetEntry.CONTENT_URI, null, null);
+
+                // Build alert dialog
+                AlertDialog.Builder alert = new AlertDialog.Builder(this);
+                alert.setMessage(R.string.delete_all_pets_confirmation);
+                alert.setPositiveButton(R.string.delete_pet, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        int rowsDeleted = getContentResolver().delete(PetEntry.CONTENT_URI, null, null);
+                        if (rowsDeleted == 0) {
+                            Toast.makeText(CatalogActivity.this, R.string.deleting_all_problem,
+                                    Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(CatalogActivity.this, R.string.pets_deleted,
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+                alert.setNegativeButton(R.string.cancel_delete, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
+                alert.show();
                 return true;
         }
         return super.onOptionsItemSelected(item);

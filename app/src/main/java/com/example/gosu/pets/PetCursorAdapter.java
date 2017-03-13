@@ -43,7 +43,10 @@ public class PetCursorAdapter extends CursorAdapter {
 
         // Set text to the TextViews
         tvName.setText(petName);
-        tvBreed.setText(breedName);
+        if (breedName.equals("")) {
+            tvBreed.setText(R.string.unknown_breed);
+        } else
+            tvBreed.setText(breedName);
 
     }
 }
