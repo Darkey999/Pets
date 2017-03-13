@@ -141,43 +141,67 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+
         // Clicking on an item from the overflow menu
         switch (item.getItemId()) {
+
             // "Save" menu option clicked
             case R.id.action_save:
                 savePet();
                 finish();
                 return true;
+
             // "Delete" menu option clicked
             case R.id.action_delete:
+                AlertDialog.Builder alertDelete = new AlertDialog.Builder(this);
+                alertDelete.setMessage(R.string.delete_pet_confirmation);
+                alertDelete.setPositiveButton(R.string.delete_pet, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        int rowDeleted = getContentResolver().delete(PetEntry.CONTENT_URI, null, null);
+                        if (rowDeleted == 0) {
+                            Toast.makeText(EditorActivity.this, R.string.pet_not_deleted,
+                                    Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(EditorActivity.this, R.string.pet_deleted,
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                        finish();
+                    }
+                });
+                alertDelete.setNegativeButton(R.string.cancel_delete, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
+                alertDelete.show();
 
                 return true;
+
             // Arrow button clicked, navigating back to parent activity
             case android.R.id.home:
 
+                // Check if views are empty
                 if (!TextUtils.isEmpty(nameEditText.getText())
                         || !TextUtils.isEmpty(breedEditText.getText())
                         || !TextUtils.isEmpty(weightEditText.getText())) {
                     // Build alert dialog
-                    AlertDialog.Builder alert = new AlertDialog.Builder(this);
-                    alert.setMessage("Discard your changes and quit editing?");
-                    alert.setPositiveButton("Discard", new DialogInterface.OnClickListener() {
+                    AlertDialog.Builder alertHome = new AlertDialog.Builder(this);
+                    alertHome.setMessage(R.string.discard_changes_confirmation);
+                    alertHome.setPositiveButton(R.string.discard_changes, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
                             NavUtils.navigateUpFromSameTask(EditorActivity.this);
                             Toast.makeText(EditorActivity.this, R.string.changes_discarded,
                                     Toast.LENGTH_SHORT).show();
                         }
                     });
-                    alert.setNegativeButton("Keep editing", new DialogInterface.OnClickListener() {
+                    alertHome.setNegativeButton(R.string.keep_editing, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
                         }
                     });
-                    alert.show();
+                    alertHome.show();
 
                     return true;
                 }
                 NavUtils.navigateUpFromSameTask(this);
-                finish();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -186,24 +210,28 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     // Handle back button
     @Override
     public void onBackPressed() {
+
+        // Check if views are empty
         if (!TextUtils.isEmpty(nameEditText.getText())
                 || !TextUtils.isEmpty(breedEditText.getText())
                 || !TextUtils.isEmpty(weightEditText.getText())) {
             // Build alert dialog
             AlertDialog.Builder alert = new AlertDialog.Builder(this);
-            alert.setMessage("Discard your changes and quit editing?");
-            alert.setPositiveButton("Discard", new DialogInterface.OnClickListener() {
+            alert.setMessage(R.string.discard_changes_confirmation);
+            alert.setPositiveButton(R.string.discard_changes, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int which) {
                     Toast.makeText(EditorActivity.this, R.string.changes_discarded,
                             Toast.LENGTH_SHORT).show();
                     finish();
                 }
             });
-            alert.setNegativeButton("Keep editing", new DialogInterface.OnClickListener() {
+            alert.setNegativeButton(R.string.keep_editing, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int which) {
                 }
             });
             alert.show();
+        } else {
+            finish();
         }
     }
 

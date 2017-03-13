@@ -66,6 +66,17 @@
     <string name="empty_view_title_text">It\'s a bit lonely here…</string>
     <string name="empty_view_subtitle_text">Get started by adding a pet</string>
 
-    <!-- Changes discarded Toast -->
+    <!-- Editing pet -->
+    <string name="discard_changes">Discard</string>
+    <string name="keep_editing">Keep editing</string>
+    <string name="discard_changes_confirmation">Discard your changes and quit editing?</string>
     <string name="changes_discarded">Changes discarded</string>
+
+    <!-- Deleting pet -->
+    <string name="delete_pet">Delete</string>
+    <string name="cancel_delete">Cancel</string>
+    <string name="delete_pet_confirmation">Are you sure you want to delete this pet?</string>
+    <string name="pet_deleted">Pet deleted</string>
+    <string name="pet_not_deleted">Error with deleting pet</string>
+
 </resources>
