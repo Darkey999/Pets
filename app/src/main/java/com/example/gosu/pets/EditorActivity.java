@@ -111,7 +111,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         if (intent.getData() == null) {
             newUri = getContentResolver().insert(PetEntry.CONTENT_URI, values);
         } else {
-            rowUpdated = getContentResolver().update(PetEntry.CONTENT_URI, values, null, null);
+            rowUpdated = getContentResolver().update(petUri, values, null, null);
         }
 
         // Result of the action
@@ -157,7 +157,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 alertDelete.setMessage(R.string.delete_pet_confirmation);
                 alertDelete.setPositiveButton(R.string.delete_pet, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        int rowDeleted = getContentResolver().delete(PetEntry.CONTENT_URI, null, null);
+                        int rowDeleted = getContentResolver().delete(petUri, null, null);
                         if (rowDeleted == 0) {
                             Toast.makeText(EditorActivity.this, R.string.pet_not_deleted,
                                     Toast.LENGTH_SHORT).show();
